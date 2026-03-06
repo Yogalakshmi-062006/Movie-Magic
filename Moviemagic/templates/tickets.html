@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Ticket - MovieMagic</title>
+    <style>
+        :root {
+            --primary-color: #e50914;
+            --secondary-color: #2d2d2d;
+            --background-color: #0a0a0a;
+            --success-color: #4CAF50;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .success-banner {
+            background-color: var(--success-color);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ticket-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .ticket {
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .ticket-header {
+            background-color: var(--primary-color);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .ticket-header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .ticket-body {
+            padding: 30px;
+            position: relative;
+        }
+
+        .ticket-body:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            border-top: 2px dashed #444;
+        }
+
+        .ticket-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .movie-details, .booking-details {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .ticket-footer {
+            background-color: #222;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            background-color: white;
+            margin: 0 auto 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: black;
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            color: #aaa;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .big-text {
+            font-size: 20px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            background-color: #f5202b;
+        }
+
+        .button.secondary {
+            background-color: #444;
+        }
+
+        .button.secondary:hover {
+            background-color: #555;
+        }
+
+        .seats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .seat-tag {
+            background-color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .ticket-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-container">
+        <div class="success-banner">
+            <h2>Booking Confirmed!</h2>
+            <p>Your tickets have been successfully booked. Enjoy the show!</p>
+        </div>
+
+        <div class="ticket">
+            <div class="ticket-header">
+                <h1>MOVIE TICKET</h1>
+            </div>
+
+            <div class="ticket-body">
+                <div class="ticket-info">
+                    <div class="movie-details">
+                        <div class="info-item">
+                            <div class="info-label">Movie</div>
+                            <div class="info-value big-text" id="movieTitle"></div>
+                        </div>
+                        <!-- <div class="info-item">
+                            <div class="info-label">Genre</div>
+                            <div class="info-value" id="movieGenre"></div>
+                        </div> -->
+                        <!-- <div class="info-item">
+                            <div class="info-label">Duration</div>
+                            <div class="info-value" id="movieDuration"></div>
+                        </div> -->
+                        <!-- <div class="info-item">
+                            <div class="info-label">Language</div>
+                            <div class="info-value" id="movieLanguage"></div>
+                        </div> -->
+                        <div class="info-item">
+                            <div class="info-label">Date</div>
+                            <div class="info-value" id="showDate"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Time</div>
+                            <div class="info-value" id="showTime"></div>
+                        </div>
+                    </div>
+
+                    <div class="booking-details">
+                        <div class="info-item">
+                            <div class="info-label">Theater</div>
+                            <div class="info-value" id="theaterName"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Address</div>
+                            <div class="info-value" id="theaterAddress"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Booking ID</div>
+                            <div class="info-value" id="bookingId"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Booked By</div>
+                            <div class="info-value" id="customerName"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Seats</div>
+                            <div class="seats-container" id="seatsContainer"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Amount Paid</div>
+                            <div class="info-value big-text" id="amountPaid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="qr-code">
+                    QR Code
+                </div> -->
+            </div>
+
+            <div class="ticket-footer">
+                <p>Please present this ticket at the counter or scan the QR code at the theater entrance.</p>
+                <p>No refunds or exchanges. Please arrive 30 minutes before the show.</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/home1" class="button">Back to Home</a>
+            <button class="button secondary" onclick="window.print()">Print Ticket</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to get booking data directly from the request form data
+            let bookingData = {
+    movie: {
+        name: "{{ booking.movie_name }}",
+    },
+    theater: {
+        name: "{{ booking.theater }}",
+        location: "{{ booking.address }}"
+    },
+    date: "{{ booking.date }}",
+    time: "{{ booking.time }}",
+    seats: "{{ booking.seats }}",
+    totalAmount: "{{ booking.amount_paid }}",
+    customer: {
+        name: "{{ booking.user_name }}",
+        email: "{{ booking.booked_by }}"
+    },
+    bookingId: "{{ booking.booking_id }}"
+};
+            
+            // If some key data is missing, try to get from session
+            if (!bookingData.movie.name || !bookingData.theater.name) {
+                try {
+                    // Try to get from sessionStorage
+                    const storedData = sessionStorage.getItem('bookingData');
+                    if (storedData) {
+                        bookingData = JSON.parse(storedData);
+                    }
+                } catch (e) {
+                    console.error("Error parsing booking data from sessionStorage:", e);
+                }
+            }
+            
+            // Proceed only if we have the minimum required data
+            if (bookingData && bookingData.movie && bookingData.movie.name) {
+                // Fill in ticket details
+                document.getElementById('movieTitle').textContent = bookingData.movie.name;
+                // document.getElementById('movieGenre').textContent = bookingData.movie.genre;
+                // document.getElementById('movieDuration').textContent = bookingData.movie.duration;
+                // document.getElementById('movieLanguage').textContent = bookingData.movie.language;
+                
+                // Format date for better display
+                let dateObj;
+                try {
+                    // If date is provided, use it
+                    if (bookingData.date) {
+                        dateObj = new Date(bookingData.date);
+                    } else {
+                        // Otherwise, use current date
+                        dateObj = new Date();
+                    }
+                } catch (e) {
+                    console.error("Error parsing date:", e);
+                    dateObj = new Date();
+                }
+                
+                const formattedDate = dateObj.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                document.getElementById('showDate').textContent = formattedDate;
+                
+                document.getElementById('showTime').textContent = bookingData.time || "7:00 PM";
+                document.getElementById('theaterName').textContent = bookingData.theater.name;
+                document.getElementById('theaterAddress').textContent = bookingData.theater.location;
+                
+                // Generate random booking ID
+                const bookingId = 'BK' + Date.now().toString().slice(-8);
+                document.getElementById('bookingId').textContent = bookingId;
+                
+                document.getElementById('customerName').textContent = bookingData.customer.name;
+                
+                // Create seat tags
+                const seatsContainer = document.getElementById('seatsContainer');
+                seatsContainer.innerHTML = ''; // Clear any existing content
+                
+                if (bookingData.seats && bookingData.seats.includes(',')) {
+                    bookingData.seats.split(',').forEach(seat => {
+                        if (seat.trim()) {
+                            const seatTag = document.createElement('div');
+                            seatTag.classList.add('seat-tag');
+                            seatTag.textContent = seat.trim();
+                            seatsContainer.appendChild(seatTag);
+                        }
+                    });
+                } else if (bookingData.seats && bookingData.seats.trim()) {
+                    // For a single seat
+                    const seatTag = document.createElement('div');
+                    seatTag.classList.add('seat-tag');
+                    seatTag.textContent = bookingData.seats.trim();
+                    seatsContainer.appendChild(seatTag);
+                }
+                
+                document.getElementById('amountPaid').textContent = '₹' + bookingData.totalAmount;
+                
+                // Store ticket in localStorage for future reference
+                saveTicketToStorage(bookingData, bookingId);
+                
+                // Save the booking data to sessionStorage for potential reuse
+                sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+            } else {
+                // If no valid booking data found, show alert and redirect
+                alert('Booking data not found. Redirecting to home page.');
+                window.location.href = '/home1';
+            }
+        });
+        
+        function saveTicketToStorage(bookingData, bookingId) {
+            // Get existing tickets or initialize empty array
+            let userTickets = [];
+            try {
+                const storedTickets = localStorage.getItem('userTickets');
+                if (storedTickets) {
+                    userTickets = JSON.parse(storedTickets);
+                }
+            } catch (e) {
+                console.error("Error parsing stored tickets:", e);
+            }
+            
+            // Add current ticket
+            userTickets.push({
+                id: bookingId,
+                movieName: bookingData.movie.name,
+                movieImage: bookingData.movie.image || '',
+                theater: bookingData.theater.name,
+                date: bookingData.date || new Date().toISOString().split('T')[0],
+                time: bookingData.time || "7:00 PM",
+                seats: bookingData.seats,
+                totalAmount: bookingData.totalAmount,
+                bookingDate: new Date().toISOString()
+            });
+            
+            // Store updated tickets
+            localStorage.setItem('userTickets', JSON.stringify(userTickets));
+        }
+    </script>
+</body>
+</html>

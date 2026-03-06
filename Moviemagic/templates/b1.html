@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking - MovieMagic</title>
+    <style>
+        :root {
+            --primary-color: #e50914;
+            --secondary-color: #2d2d2d;
+            --background-color: #0a0a0a;
+            --seat-available: #4CAF50;
+            --seat-occupied: #757575;
+            --seat-selected: #e50914;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .top-nav {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            max-width: 1200px;
+            margin: 0 auto 20px auto;
+        }
+
+        .home-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .booking-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .movie-info {
+            background: var(--secondary-color);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .movie-info img {
+            width: 100%;
+            max-width: 200px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .movie-details {
+            display: flex;
+            gap: 20px;
+        }
+
+        .movie-poster {
+            flex: 0 0 200px;
+        }
+
+        .movie-text {
+            flex: 1;
+        }
+
+        .seat-map {
+            background: var(--secondary-color);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .date-time-selection {
+            background: var(--secondary-color);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .date-selector {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            margin-bottom: 15px;
+        }
+
+        .date-item {
+            min-width: 80px;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            background: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .date-item.selected {
+            background: var(--primary-color);
+        }
+
+        .date-item .day {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .date-item .date {
+            font-size: 14px;
+        }
+
+        .time-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .time-item {
+            padding: 10px 15px;
+            border-radius: 5px;
+            background: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-item.selected {
+            background: var(--primary-color);
+        }
+
+        .seat-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .row-label {
+            width: 30px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .seat {
+            width: 40px;
+            height: 40px;
+            background: var(--seat-available);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .seat.occupied {
+            background: var(--seat-occupied);
+            cursor: not-allowed;
+        }
+
+        .seat.selected {
+            background: var(--seat-selected);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .seat-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        .legend-available {
+            background: var(--seat-available);
+        }
+
+        .legend-occupied {
+            background: var(--seat-occupied);
+        }
+
+        .legend-selected {
+            background: var(--seat-selected);
+        }
+
+        .payment-details {
+            background: var(--secondary-color);
+            padding: 20px;
+            border-radius: 10px;
+            height: fit-content;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #333;
+            color: white;
+        }
+
+        .price-summary {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .price-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 18px;
+            border-top: 1px solid #444;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .confirm-button {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .confirm-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .screen-indicator {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px 5px 0 0;
+            transform: perspective(500px) rotateX(-5deg);
+        }
+
+        .selected-seats-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 5px;
+            min-height: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <a href="{{ url_for('home1') }}" class="home-button">← Back to Home </a>
+
+    </div>
+
+    <div class="booking-container">
+        <div class="selection-section">
+            <div class="movie-info">
+                <div class="movie-details">
+                    <div class="movie-poster">
+                        <img id="moviePoster" src="https://via.placeholder.com/200x300" alt="Movie Poster">
+                    </div>
+                    <div class="movie-text">
+                        <h1>{{ movie }}</h1>
+                        <p>Theater: {{ theater }}</p>
+                        <p>Address: {{ address }}</p>
+                        <p>Price per seat: ₹{{ price }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="date-time-selection">
+                <h2>Select Date & Time</h2>
+                <div class="date-selector" id="dateSelector">
+                    <!-- Date options will be generated here -->
+                </div>
+                
+                <h3>Show Times</h3>
+                <div class="time-selector" id="timeSelector">
+                    <!-- Time options will be generated here -->
+                </div>
+            </div>
+
+            <div class="seat-map">
+                <div class="screen-indicator">Screen</div>
+                <div id="seat-container">
+                    <!-- Seats will be dynamically generated here -->
+                </div>
+                
+                <div class="seat-legend">
+                    <div class="legend-item">
+                        <div class="legend-box legend-available"></div>
+                        <span>Available</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box legend-occupied"></div>
+                        <span>Occupied</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box legend-selected"></div>
+                        <span>Selected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-section">
+            <div class="payment-details">
+                <h2>Booking Details</h2>
+                <form method="POST" action="{{ url_for('tickets') }}">
+                    <!-- Hidden fields to pass booking details -->
+                    <input type="hidden" name="movie" value="{{ movie }}">
+                    <input type="hidden" name="theater" value="{{ theater }}">
+                    <input type="hidden" name="address" value="{{ address }}">
+                    <input type="hidden" name="price" value="{{ price }}">
+                    <input type="hidden" name="date" id="hiddenDate">
+                    <input type="hidden" name="time" id="hiddenTime">
+                    <input type="hidden" name="seats" id="hiddenSelectedSeats">
+                    <input type="hidden" name="amount" id="hiddenTotalPrice">
+                
+                    <!-- Selected Seats Display -->
+                    <div class="form-group">
+                        <label>Selected Seats</label>
+                        <div class="selected-seats-list" id="selectedSeatsList">None selected</div>
+                    </div>
+                
+                    <!-- User Info -->
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" name="phone" pattern="[0-9]{10}" required>
+                    </div>
+                
+                    <!-- Payment Info -->
+                    <h2>Payment Information</h2>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select name="payment_method" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="credit">Credit Card</option>
+                            <option value="debit">Debit Card</option>
+                            <option value="upi">UPI</option>
+                            <option value="netbanking">Cash On delivary</option>
+                        </select>
+                    </div>
+                
+                    <!-- Price Summary -->
+                    <div class="price-summary">
+                        <h3>Price Summary</h3>
+                        <div class="price-item">
+                            <span>Ticket Price (₹<span id="ticketPriceEach">{{ price }}</span> x <span id="selectedSeatsCount">0</span>)</span>
+                            <span>₹<span id="ticketSubtotal">0</span></span>
+                        </div>
+                        <div class="price-item">
+                            <span>Convenience Fee</span>
+                            <span>₹<span id="convenienceFee">0</span></span>
+                        </div>
+                        <div class="price-total">
+                            <span>Total Amount</span>
+                            <span>₹<span id="totalPrice">0</span></span>
+                        </div>
+                    </div>
+                
+                    <button type="submit" class="confirm-button" id="confirmButton" disabled>Confirm Booking</button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let selectedSeats = new Set();
+        let selectedDate = null;
+        let selectedTime = null;
+        let pricePerSeat = 0; // Will be populated from template
+        const convenienceFeePercentage = 1.75; // 1.75% convenience fee
+        
+        // DOM Elements
+        const seatContainer = document.getElementById("seat-container");
+        const selectedSeatsCount = document.getElementById("selectedSeatsCount");
+        const ticketPriceEach = document.getElementById("ticketPriceEach");
+        const ticketSubtotal = document.getElementById("ticketSubtotal");
+        const convenienceFee = document.getElementById("convenienceFee");
+        const totalPrice = document.getElementById("totalPrice");
+        const confirmButton = document.getElementById("confirmButton");
+        const selectedSeatsList = document.getElementById("selectedSeatsList");
+        const moviePoster = document.getElementById("moviePoster");
+        
+        // Form Hidden Inputs
+        const hiddenDate = document.getElementById("hiddenDate");
+        const hiddenTime = document.getElementById("hiddenTime");
+        const hiddenSelectedSeats = document.getElementById("hiddenSelectedSeats");
+        const hiddenTotalPrice = document.getElementById("hiddenTotalPrice");
+    
+        // Function to parse URL parameters
+        function getUrlParams() {
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const params = Object.fromEntries(urlSearchParams.entries());
+            return params;
+        }
+        
+        // Initialize the booking page
+        function initialize() {
+            // Set price directly from template value
+            pricePerSeat = parseInt(ticketPriceEach.textContent) || 0;
+            
+            // Set movie poster based on the movie name
+            // setMoviePoster();
+            
+            // Generate date options
+            generateDateOptions();
+            // Time options will be generated after date selection
+            // Seats will be generated after time selection
+        }
+        
+        // Set appropriate poster based on movie name
+        // function setMoviePoster() {
+        //     const movieName = getUrlParams().movie?.toLowerCase();
+            
+        //     // Set specific posters based on movie names
+        //     if (movieName === "rrr") {
+        //         moviePoster.src = "../static/images/rrr.jpg";
+        //     } else if (movieName === "pushpa: the rise") {
+        //         moviePoster.src = "../static/images/court.jpg";
+        //     } else if (movieName === "mad^2") {
+        //         moviePoster.src = "../static/images/mad.jpg";
+        //     } else if (movieName === "robinhood") {
+        //         moviePoster.src = "../static/images/robinhood.jpg";
+        //     } else if (movieName === "presence") {
+        //         moviePoster.src = "../static/images/presence.jpg";
+        //     } else {
+        //         // Default poster if no match
+        //         moviePoster.src = "https://via.placeholder.com/200x300";
+        //     }
+        // }
+    
+        function generateDateOptions() {
+            const dateSelector = document.getElementById("dateSelector");
+            dateSelector.innerHTML = ''; // Clear any existing content
+            const today = new Date();
+            
+            // Generate date options for the next 7 days
+            for (let i = 0; i < 7; i++) {
+                const date = new Date();
+                date.setDate(today.getDate() + i);
+                
+                const dateDiv = document.createElement("div");
+                dateDiv.classList.add("date-item");
+                if (i === 0) dateDiv.classList.add("selected"); // Select today by default
+                
+                const day = document.createElement("div");
+                day.classList.add("day");
+                day.textContent = date.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                const dateNum = document.createElement("div");
+                dateNum.classList.add("date");
+                dateNum.textContent = date.getDate();
+                
+                dateDiv.appendChild(day);
+                dateDiv.appendChild(dateNum);
+                
+                const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+                dateDiv.dataset.date = dateString;
+                
+                dateDiv.addEventListener("click", function() {
+                    // Update selected date
+                    document.querySelectorAll(".date-item").forEach(item => item.classList.remove("selected"));
+                    dateDiv.classList.add("selected");
+                    selectedDate = dateString;
+                    hiddenDate.value = selectedDate; // Update hidden input
+                    
+                    // Update time options
+                    generateTimeOptions(i === 0); // Check if it's today
+                    
+                    // Reset seat selection when date changes
+                    resetSeatSelection();
+                });
+                
+                dateSelector.appendChild(dateDiv);
+            }
+            
+            // Set initial selected date
+            selectedDate = today.toISOString().split('T')[0];
+            hiddenDate.value = selectedDate; // Set initial hidden date value
+            
+            // Generate initial time options
+            generateTimeOptions(true); // It's today initially
+        }
+    
+        function generateTimeOptions(isToday) {
+            const timeSelector = document.getElementById("timeSelector");
+            timeSelector.innerHTML = ''; // Clear previous options
+            
+            // Sample show times
+            const showTimes = ["10:00 AM", "12:30 PM", "3:15 PM", "6:00 PM", "9:00 PM"];
+            const currentHour = isToday ? new Date().getHours() : 0;
+            
+            let timeAdded = false;
+            
+            showTimes.forEach((time, index) => {
+                // For today, only show future show times (simple approximation)
+                const showTimeHour = parseInt(time.split(':')[0]) + (time.includes('PM') && time.split(':')[0] !== '12' ? 12 : 0);
+                
+                if (!isToday || showTimeHour > currentHour) {
+                    const timeDiv = document.createElement("div");
+                    timeDiv.classList.add("time-item");
+                    timeDiv.textContent = time;
+                    timeDiv.dataset.time = time;
+                    
+                    timeDiv.addEventListener("click", function() {
+                        // Update selected time
+                        document.querySelectorAll(".time-item").forEach(item => item.classList.remove("selected"));
+                        timeDiv.classList.add("selected");
+                        selectedTime = time;
+                        hiddenTime.value = selectedTime; // Update hidden input
+                        
+                        // Generate seats after time selection
+                        generateSeats();
+                        
+                        // Reset seat selection when time changes
+                        resetSeatSelection();
+                    });
+                    
+                    timeSelector.appendChild(timeDiv);
+                    timeAdded = true;
+                    
+                    // Select first available time by default
+                    if (!selectedTime && (index === 0 || !isToday)) {
+                        timeDiv.click();
+                    }
+                }
+            });
+            
+            // If no times available for today, show message
+            if (!timeAdded) {
+                const noTimesDiv = document.createElement("div");
+                noTimesDiv.textContent = "No more shows available for today";
+                timeSelector.appendChild(noTimesDiv);
+            }
+        }
+    
+        function generateSeats() {
+            seatContainer.innerHTML = ''; // Clear previous seats
+            
+            // Get address from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const address = urlParams.get('address') || '';
+            
+            // Check if theater is in Dindigul - use smaller layout
+            let rows, seatsPerRow;
+            if (address.toLowerCase().includes('dindigul')) {
+                rows = ["A", "B", "C", "D", "E", "F"];  // 6 rows for Dindigul
+                seatsPerRow = 8;  // 8 seats per row for Dindigul
+            } else {
+                rows = ["A", "B", "C", "D", "E", "F", "G", "H"];  // 8 rows for other cities
+                seatsPerRow = 10;  // 10 seats per row for other cities
+            }
+            
+            rows.forEach(row => {
+                const rowDiv = document.createElement("div");
+                rowDiv.classList.add("seat-row");
+                
+                // Add row label
+                const rowLabel = document.createElement("div");
+                rowLabel.classList.add("row-label");
+                rowLabel.textContent = row;
+                rowDiv.appendChild(rowLabel);
+                
+                for (let i = 1; i <= seatsPerRow; i++) {
+                    const seat = document.createElement("div");
+                    seat.classList.add("seat");
+                    seat.textContent = i;
+                    seat.dataset.seatId = `${row}${i}`;
+                    
+                    // Create a deterministic pattern of occupied seats based on date, time, and seat position
+                    const seed = selectedDate.replace(/-/g, '') + selectedTime.replace(/[: APM]/g, '');
+                    const seatSeed = parseInt(row.charCodeAt(0)) + i + parseInt(seed.substring(0, 8));
+                    if (seatSeed % 7 === 0 || seatSeed % 13 === 0) {
+                        seat.classList.add("occupied");
+                    }
+                    
+                    seat.addEventListener("click", function() {
+                        if (!seat.classList.contains("occupied")) {
+                            seat.classList.toggle("selected");
+                            toggleSeatSelection(seat.dataset.seatId);
+                        }
+                    });
+                    
+                    rowDiv.appendChild(seat);
+                }
+                
+                seatContainer.appendChild(rowDiv);
+            });
+        }
+    
+        function toggleSeatSelection(seatId) {
+            if (selectedSeats.has(seatId)) {
+                selectedSeats.delete(seatId);
+            } else {
+                selectedSeats.add(seatId);
+            }
+            updatePrice();
+            updateSelectedSeatsList();
+            updateConfirmButton();
+        }
+    
+        function resetSeatSelection() {
+            selectedSeats.clear();
+            document.querySelectorAll(".seat.selected").forEach(seat => {
+                seat.classList.remove("selected");
+            });
+            updatePrice();
+            updateSelectedSeatsList();
+            updateConfirmButton();
+        }
+    
+        function updateSelectedSeatsList() {
+            if (selectedSeats.size === 0) {
+                selectedSeatsList.textContent = "None selected";
+            } else {
+                // Sort seats by row and number
+                const sortedSeats = Array.from(selectedSeats).sort((a, b) => {
+                    const rowA = a.charAt(0);
+                    const rowB = b.charAt(0);
+                    if (rowA === rowB) {
+                        return parseInt(a.substring(1)) - parseInt(b.substring(1));
+                    }
+                    return rowA.localeCompare(rowB);
+                });
+                
+                selectedSeatsList.textContent = sortedSeats.join(", ");
+            }
+        }
+    
+        function updatePrice() {
+            const seatCount = selectedSeats.size;
+            const subtotal = seatCount * pricePerSeat;
+            const fee = Math.round(subtotal * (convenienceFeePercentage / 100));
+            const total = subtotal + fee;
+            
+            selectedSeatsCount.textContent = seatCount;
+            ticketSubtotal.textContent = subtotal;
+            convenienceFee.textContent = fee;
+            totalPrice.textContent = total;
+            
+            // Update form hidden inputs
+            hiddenSelectedSeats.value = Array.from(selectedSeats).join(",");
+            hiddenTotalPrice.value = total;
+        }
+    
+        function updateConfirmButton() {
+            // Enable button only if seats are selected
+            confirmButton.disabled = selectedSeats.size === 0;
+        }
+    
+        // Initialize the page when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>

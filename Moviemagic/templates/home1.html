@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieMagic - Home</title>
+    <!-- External CSS Only -->
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <!-- Header Section with Background -->
+    <div class="header-section">
+        <div class="dropdown">
+            <button class="dropbtn">MovieMagic</button>
+            <div class="dropdown-content">
+                <a href="{{ url_for('about') }}">About Us</a>
+                <a href="{{ url_for('contact') }}">Contact Us</a>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav>
+            <div class="nav-right">
+                <a href="{{ url_for('home1') }}">Home</a>
+                <!-- <a href="{{ url_for('tickets') }}">Tickets</a> -->
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </nav>
+
+        <!-- Welcome Message & Search -->
+        <div class="welcome-container">
+            <div class="welcome-message">
+                <h1>Welcome to MovieMagic</h1>
+                <p>Your one-stop destination for movie tickets in Hyderabad,Bangalore,Mumbai,Dindigul</p>
+            </div>
+            <div class="search-container">
+                <form id="searchForm">
+                    <div class="search-box">
+                        <select id="language" aria-label="Select movie language">
+                            <option value="Telugu">Telugu</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="English">English</option>
+                            <option value="Tamil">Tamil</option>
+                        </select>
+                        <input type="text" id="city" placeholder="Enter City (e.g., Hyderabad)" aria-label="Enter city name" required>
+                        <button type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results Section (Hidden Initially) -->
+    <div class="search-results-section" id="searchResultsSection" style="display: none;">
+        <div class="container">
+            <h2>Search Results</h2>
+            <div id="movieResults" class="search-results-grid"></div>
+        </div>
+    </div>
+
+    <!-- Scrollable Movies Section -->
+    <div class="movies-section">
+        <div class="trending">
+            <h2>Top Trending Movies</h2>
+            <div class="movie-grid">
+                <!-- Static Movie Cards -->
+                <div class="movie-card">
+                    <img src="../static/images/court.jpg" class="movie-poster" alt="Court">
+                    <div class="movie-info">
+                        <h3 class="movie-title">Court</h3>
+                        <p class="movie-genre">Action, Drama</p>
+                    </div>
+                </div>
+                
+                <div class="movie-card">
+                    <img src="../static/images/mad.jpg" class="movie-poster" alt="Mad^2">
+                    <div class="movie-info">
+                        <h3 class="movie-title">Mad^2</h3>
+                        <p class="movie-genre">Action, Historical</p>
+                    </div>
+                </div>
+                
+                <div class="movie-card">
+                    <img src="../static/images/robinhood.jpg" class="movie-poster" alt="Robinhood">
+                    <div class="movie-info">
+                        <h3 class="movie-title">Robinhood</h3>
+                        <p class="movie-genre">Action, Thriller</p>
+                    </div>
+                </div>
+
+                <div class="movie-card">
+                    <img src="../static/images/presence.jpg" class="movie-poster" alt="Presence">
+                    <div class="movie-info">
+                        <h3 class="movie-title">Presence</h3>
+                        <p class="movie-genre">Action, Thriller</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theater Selection Modal -->
+    <div id="theaterModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modalMovieTitle">Select Theater & Showtime</h2>
+            <div id="theaterList" class="theater-list"></div>
+            <!-- Change this line -->
+            <!-- Change this line -->
+          <form id="bookingForm" action="{{ url_for('b1') }}" method="get">
+                <input type="hidden" id="selectedMovie" name="movie">
+                <input type="hidden" id="selectedTheater" name="theater">
+                <input type="hidden" id="selectedTheaterId" name="theaterId">
+                <input type="hidden" id="selectedTime" name="time">
+                <input type="hidden" id="selectedAddress" name="address">
+                <input type="hidden" id="moviePrice" name="price">
+                <button type="submit" id="proceedToBooking" class="proceed-btn" disabled>Proceed to Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- load data file once using Flask helper -->
+    <script src="{{ url_for('static', filename='js/movies1.js') }}"></script>
+    
+    <!-- Inline Scripts (Keep minimal) -->
+    <script>
+// run all initialization after the DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    const header = document.querySelector('nav');
+    const movieCards = document.querySelectorAll('.movie-card');
+
+    if (header && movieCards.length > 0) {
+        window.addEventListener('scroll', () => {
+            header.style.backgroundColor = window.scrollY > 50 
+                ? 'rgba(0, 0, 0, 0.98)' 
+                : 'rgba(0, 0, 0, 0.85)';
+        });
+
+        // Initialize animations
+        const animateCards = () => {
+            movieCards.forEach(card => {
+                const cardTop = card.getBoundingClientRect().top;
+                if (cardTop < window.innerHeight - 100) {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }
+            });
+        };
+        
+        window.addEventListener('scroll', animateCards);
+        animateCards();
+    }
+});
+
+// Modal Functionality
+const modal = document.getElementById('theaterModal');
+const closeBtn = document.querySelector('.close-modal');
+
+if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+}
+
+window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+
+// Handle theater selection (Time selection is removed)
+function selectTheater(theaterId, theaterName, address) {
+    // Clear previous selections
+    document.querySelectorAll('.theater-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+
+    // Mark selected theater
+    document.getElementById('theater-' + theaterId).classList.add('selected');
+
+    // Set the selected theater in the form
+    document.getElementById('selectedTheater').value = theaterName;
+    document.getElementById('selectedTheaterId').value = theaterId;
+    document.getElementById('selectedAddress').value = address;
+
+    // Enable the proceed button
+    checkFormValidity();
+}
+
+// Enable/Disable Proceed button based on theater selection
+function checkFormValidity() {
+    const theater = document.getElementById('selectedTheater').value;
+    const proceedButton = document.getElementById('proceedToBooking');
+
+    if (theater) {
+        proceedButton.removeAttribute('disabled');
+    } else {
+        proceedButton.setAttribute('disabled', 'disabled');
+    }
+}
+
+// Function to book a movie directly from search results
+// function bookMovie(movieTitle, movieId, price) {
+//     const theaterSelect = document.getElementById(`theater-${movieId}`);
+//     if (!theaterSelect || !theaterSelect.value) {
+//         alert("Please select a theater before proceeding.");
+//         return;
+//     }
+
+//     const theaterIndex = theaterSelect.value;
+//     const movie = movies.find(m => m.id === movieId);
+//     const city = document.getElementById('city').value.toLowerCase();
+//     const cityTheaters = movie.locations.filter(loc => loc.city.toLowerCase() === city);
+//     const theater = cityTheaters[theaterIndex];
+
+//     if (!theater) {
+//         alert("Theater not found");
+//         return;
+//     }
+
+//     const movieTitleEncoded = encodeURIComponent(movieTitle);
+//     const theaterName = encodeURIComponent(theater.theater);
+//     const theaterAddress = encodeURIComponent(theater.address);
+//     const finalPrice = price;
+
+//     // ✅ THIS IS WHERE YOU ADD IT:
+//     window.location.href = `/b1?movie=${movieTitleEncoded}&theater=${theaterName}&address=${theaterAddress}&price=${finalPrice}`;
+// }
+
+
+function bookMovie(movieTitle, movieId, price) {
+    const theaterSelect = document.getElementById(`theater-${movieId}`);
+    if (!theaterSelect || !theaterSelect.value) {
+        alert("Please select a theater before proceeding.");
+        return;
+    }
+
+    const theaterIndex = theaterSelect.value;
+    const movie = movies.find(m => m.id === movieId);
+    const city = document.getElementById('city').value.toLowerCase();
+    const cityTheaters = movie.locations.filter(loc => loc.city.toLowerCase() === city);
+    const theater = cityTheaters[theaterIndex];
+
+    if (!theater) {
+        alert("Theater not found");
+        return;
+    }
+
+    // Encode parameters properly
+    const params = new URLSearchParams({
+        movie: movieTitle,
+        theater: theater.theater,
+        address: theater.address,
+        price: price
+    });
+
+    window.location.href = `/b1?${params.toString()}`;
+}
+
+// Search Functionality
+document.getElementById('searchForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const language = document.getElementById('language').value;
+    const city = document.getElementById('city').value.toLowerCase();
+    const movieResults = document.getElementById('movieResults');
+    const searchResultsSection = document.getElementById('searchResultsSection');
+
+    movieResults.innerHTML = "";  // Clear previous results
+    searchResultsSection.style.display = "none";  // Hide initially
+
+    if (typeof movies === "undefined" || !Array.isArray(movies)) {
+        console.error("Error: 'movies' is not loaded.");
+        return;
+    }
+
+    const filteredMovies = movies.filter(movie => 
+        movie.languages.includes(language) && 
+        movie.locations.some(loc => loc.city.toLowerCase() === city)
+    );
+
+    if (filteredMovies.length > 0) {
+        searchResultsSection.style.display = "block";  // Show results section
+
+        filteredMovies.forEach(movie => {
+            const movieCard = document.createElement('div');
+            movieCard.classList.add('search-result-card');
+
+            // Get theaters in the selected city
+            const cityTheaters = movie.locations.filter(loc => loc.city.toLowerCase() === city);
+
+            // Create movie card with poster and theater selection
+            movieCard.innerHTML = `
+                <div class="result-card-content">
+                    <div class="result-poster">
+                        <img src="${movie.poster}" alt="${movie.name} poster">
+                    </div>
+                    <div class="result-details">
+                        <h3 class="result-title">${movie.name}</h3>
+                        <p class="result-description">${movie.description}</p>
+                        <div class="result-info">
+                            <div class="result-languages">
+                                <strong>Languages:</strong> ${movie.languages.join(", ")}
+                            </div>
+                            <div class="result-price">
+                                <span class="price-tag">₹${movie.price}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Theater Selection Dropdown -->
+                        <div class="theater-selection">
+                            <label for="theater-${movie.id}"><strong>Select Theater:</strong></label>
+                            <select id="theater-${movie.id}" class="theater-dropdown">
+                                <option value="">Choose a theater</option>
+                                ${cityTheaters.map((location, index) => 
+                                    `<option value="${index}">${location.theater} - ${location.address}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="result-action">
+                            <button id="book-btn-${movie.id}" class="book-btn" disabled 
+                                onclick="bookMovie('${movie.name.replace(/'/g, "\\'").replace(/"/g, '\\"')}', ${movie.id}, ${movie.price})">
+                                Book Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            movieResults.appendChild(movieCard);
+
+            // Enable/Disable book button based on theater selection
+            const theaterSelect = document.getElementById(`theater-${movie.id}`);
+            if (theaterSelect) {
+                theaterSelect.addEventListener('change', function() {
+                    const bookBtn = document.getElementById(`book-btn-${movie.id}`);
+                    bookBtn.disabled = !this.value;
+                });
+            }
+        });
+    } else {
+        searchResultsSection.style.display = "block";
+        movieResults.innerHTML = `<p class="no-results">No movies found for ${language} in ${city.charAt(0).toUpperCase() + city.slice(1)}</p>`;
+    }
+
+    // Scroll to search results
+    searchResultsSection.scrollIntoView({ behavior: 'smooth' });
+});
+
+    </script>
+
+    <!-- Add styles for search results and modal -->
+    <style>
+        /* Search Results Section */
+        .search-results-section {
+    background: var(--bg-color);
+    padding: 3rem 0;
+    border-top: 1px solid rgba(229, 9, 20, 0.3);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.search-results-section h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    justify-items: center; /* Center items in grid */
+}
+
+.search-result-card {
+    background: rgba(30, 30, 30, 0.9);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    border: 2px solid rgba(229, 9, 20, 0.3);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.search-result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 25px rgba(229, 9, 20, 0.15);
+    border-color: rgba(229, 9, 20, 0.5);
+}
+
+.result-poster {
+    width: 100%;
+    height: 250px; /* Reduced height for better proportions */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000; /* Dark background for any gaps */
+}
+
+.result-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Changed from cover to contain */
+    transition: transform 0.5s ease;
+}
+
+.search-result-card {
+    background: rgba(30, 30, 30, 0.9);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    border: 2px solid rgba(229, 9, 20, 0.3);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 300px; /* Added max-width */
+    margin: 0 auto; /* Center the cards */
+}
+
+.result-details {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.result-title {
+    color: var(--primary-color);
+    font-size: 1.6rem;
+    margin: 0 0 0.8rem 0;
+}
+
+.result-description {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.result-info {
+    margin-bottom: 1rem;
+}
+
+.result-languages {
+    margin-bottom: 0.8rem;
+}
+
+.result-languages strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.price-tag {
+    background: rgba(78, 205, 196, 0.15);
+    color: #4ECDC4;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.theater-selection {
+    margin-top: auto;
+    margin-bottom: 1rem;
+}
+
+/* Theater dropdown styles */
+.theater-dropdown {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    color: white;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.theater-dropdown:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.book-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.book-btn:disabled {
+    background: #5a5a5a;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.book-btn:not(:disabled):hover {
+    background: #ff1a1a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+}
+
+.no-results {
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    padding: 2rem;
+    grid-column: 1 / -1;
+}
+
+/* Responsive design for search results */
+@media (max-width: 768px) {
+    .search-results-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    .result-poster {
+        height: 320px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-results-grid {
+        grid-template-columns: 1fr;
+    }
+}
+    </style>
+</body>
+</html>
